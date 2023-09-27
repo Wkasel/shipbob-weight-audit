@@ -12,14 +12,14 @@ export class Audit {
     private logger: Logger;
     private config: AuditConfig;
 
-    constructor(config: AuditConfig) {
+    constructor(config: AuditConfig, api: ShipBobAPI) {
         this.config = config;
+        this.api = api;
     }
     public static async create(config: AuditConfig): Promise<Audit> {
         const logger = new Logger(config);
-        const api = await ShipBobAPI.create(process.env.SHIPBOB_API_TOKEN, logger);
-        const audit = new Audit(config);
-        audit.api = api;
+        const api = await ShipBobAPI.create(process.env.SHIPBOB_API_TOKEN, logger, config);
+        const audit = new Audit(config, api);
         audit.logger = logger;
         return audit;
     }
@@ -55,7 +55,30 @@ export class Audit {
             this.logger.log(`No discrepancies found for Order ID ${orderId}`);
         }
 
-        return { hasChargedWeight, totalActualWeight, totalChargedWeight };
+        let estimatedCost = 0;
+        let actualCost = 0;
+        let costDifference = 0;
+        try {
+            estimatedCost = await this.api.estimateCost(order);  // Assuming 'Free 2-day Shipping' is one of the shipping methods
+            actualCost = order.shipments[0]?.invoice_amount || 0;
+            costDifference = actualCost - estimatedCost;
+
+            this.logger.log(`Order ID ${orderId} - Estimated Cost: ${estimatedCost}`);
+            this.logger.log(`Order ID ${orderId} - Actual Cost: ${actualCost}`);
+            this.logger.log(`Order ID ${orderId} - Cost Difference: ${costDifference}`);
+        } catch (error) {
+            this.logger.log(`Error estimating cost for Order ID ${orderId}: ${error}`);
+        }
+
+        return {
+            hasChargedWeight,
+            totalActualWeight,
+            totalChargedWeight,
+            estimatedCost,
+            actualCost,
+            costDifference,
+            discrepancies
+        };
     }
 
     public async runAudit() {
@@ -66,12 +89,26 @@ export class Audit {
         let totalOrders = 0;
         let ordersWithNullChargedWeight = 0;
         let ordersWithChargedWeight = 0;
+        let totalCostDifference = 0;
+        let totalEstimatedCost = 0;
+        let totalActualCost = 0;
 
         for (const order of orders) {
             totalOrders++;
-            const { hasChargedWeight, totalActualWeight: orderActualWeight, totalChargedWeight: orderChargedWeight } = await this.processOrder(order);
+            const {
+                hasChargedWeight,
+                totalActualWeight: orderActualWeight,
+                totalChargedWeight: orderChargedWeight,
+                estimatedCost,
+                actualCost,
+                costDifference
+            } = await this.processOrder(order);
+
             totalActualWeight += orderActualWeight;
             totalChargedWeight += orderChargedWeight;
+            totalEstimatedCost += estimatedCost;
+            totalActualCost += actualCost;
+            totalCostDifference += costDifference;
 
             if (hasChargedWeight) {
                 ordersWithChargedWeight++;
@@ -80,7 +117,16 @@ export class Audit {
             }
         }
 
-        this.logSummary(totalOrders, ordersWithChargedWeight, ordersWithNullChargedWeight, totalActualWeight, totalChargedWeight);
+        this.logSummary(
+            totalOrders,
+            ordersWithChargedWeight,
+            ordersWithNullChargedWeight,
+            totalActualWeight,
+            totalChargedWeight,
+            totalEstimatedCost,
+            totalActualCost,
+            totalCostDifference
+        );
     }
 
     public async compareWeights(orderId: number): Promise<{ shipmentId: number, chargedWeight: number, actualWeight: number }[]> {
@@ -111,15 +157,15 @@ export class Audit {
                     actualWeight += inventoryItem.dimensions.weight * quantity;
 
                     this.logger.debug(`
-            ------------------------------
-            was negative id: ${isNegativeId}
-            product id: ${product.id}
-            inventory id: ${inventoryItem.id}
-            quantity: ${quantity}
-            individual weight: ${inventoryItem.dimensions.weight}
-            combined weight: ${inventoryItem.dimensions.weight * quantity}
-            ------------------------------
-          `);
+                        ------------------------------
+                        was negative id: ${isNegativeId}
+                        product id: ${product.id}
+                        inventory id: ${inventoryItem.id}
+                        quantity: ${quantity}
+                        individual weight: ${inventoryItem.dimensions.weight}
+                        combined weight: ${inventoryItem.dimensions.weight * quantity}
+                        ------------------------------
+                    `);
                 }
             } else {
                 this.logger.log('Invalid product data: ' + JSON.stringify(product));
@@ -140,7 +186,17 @@ export class Audit {
         return null;
     }
 
-    private logSummary(totalOrders: number, ordersWithChargedWeight: number, ordersWithNullChargedWeight: number, totalActualWeight: number, totalChargedWeight: number) {
+    private logSummary(
+        totalOrders: number,
+        ordersWithChargedWeight: number,
+        ordersWithNullChargedWeight: number,
+        totalActualWeight: number,
+        totalChargedWeight: number,
+        totalEstimatedCost: number,
+        totalActualCost: number,
+        totalCostDifference: number
+
+    ) {
         this.logger.log(`
         
         ------------------------------
@@ -159,6 +215,9 @@ export class Audit {
         this.logger.log(`Orders with Null Charged Weight: ${ordersWithNullChargedWeight}`);
         this.logger.log(`Total Actual Weight: ${totalActualWeight}`);
         this.logger.log(`Total Charged Weight: ${totalChargedWeight}`);
+        this.logger.log(`Total Estimated Cost: ${totalEstimatedCost}`);
+        this.logger.log(`Total Actual Cost: ${totalActualCost}`);
+        this.logger.log(`Total Cost Difference: ${totalCostDifference}`);
 
         if (totalChargedWeight > 0) {
             const overchargedWeight = totalChargedWeight - totalActualWeight;
@@ -168,5 +227,9 @@ export class Audit {
         } else {
             this.logger.log('No charged weight to calculate overcharge percentage.');
         }
+    }
+
+    public async getShippingMethods(): Promise<any[]> {
+        return this.api.getShippingMethods();
     }
 }

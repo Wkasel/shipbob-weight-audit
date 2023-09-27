@@ -3,5 +3,6 @@ export interface AuditConfig {
     logLevel: string;
     logFile: string;
     debugMode: boolean;
+    channelName: string;
 }
 

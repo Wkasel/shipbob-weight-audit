@@ -25,7 +25,7 @@
   "scripts": {
     "start": "node build/src/main.js",
     "clean": "rimraf coverage build tmp",
-    "dev": "ts-node --project tsconfig.json src/main.ts",
+    "audit": "ts-node --project tsconfig.json src/main.ts",
     "prebuild": "npm run lint",
     "build": "tsc -p tsconfig.json",
     "build:watch": "tsc -w -p tsconfig.json",
