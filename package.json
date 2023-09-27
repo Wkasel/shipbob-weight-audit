@@ -1,8 +1,7 @@
 {
-  "name": "node-typescript-boilerplate",
+  "name": "shipbob-weight-audit",
   "version": "0.0.0",
-  "description": "Minimalistic boilerplate to quick-start Node.js development in TypeScript.",
-  "type": "module",
+  "description": "Easy way to keep shipbob from committing fraud.",
   "engines": {
     "node": ">= 18.12 <19"
   },
@@ -11,6 +10,7 @@
     "@types/node": "~18",
     "@typescript-eslint/eslint-plugin": "~6.2",
     "@typescript-eslint/parser": "~6.2",
+    "dotenv": "^16.3.1",
     "eslint": "~8.46",
     "eslint-config-prettier": "~9.0",
     "eslint-plugin-jest": "~27.2",
@@ -19,11 +19,13 @@
     "rimraf": "~5.0",
     "ts-api-utils": "~1.0",
     "ts-jest": "~29.1",
+    "ts-node": "^10.9.1",
     "typescript": "~5.1"
   },
   "scripts": {
     "start": "node build/src/main.js",
     "clean": "rimraf coverage build tmp",
+    "dev": "ts-node --project tsconfig.json src/main.ts",
     "prebuild": "npm run lint",
     "build": "tsc -p tsconfig.json",
     "build:watch": "tsc -w -p tsconfig.json",
@@ -36,7 +38,9 @@
   "author": "Jakub Synowiec <jsynowiec@users.noreply.github.com>",
   "license": "Apache-2.0",
   "dependencies": {
-    "tslib": "~2.6"
+    "axios": "^1.5.1",
+    "tslib": "~2.6",
+    "winston": "^3.10.0"
   },
   "volta": {
     "node": "18.12.1"
