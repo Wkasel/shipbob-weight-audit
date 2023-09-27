@@ -1,11 +1,10 @@
 # Shipbob Weight Audit :balance_scale:
 
 > A tool to keep them "honest". :face_with_symbols_over_mouth:
-> I wrote this tool because I experienced (major) discrepancies in my own shipping weights. > For example, items that according to their own system weigh 9oz were shipped as 3lbs, a 5x > markup! :money_with_wings:
 
-I'm making this tool so you can very easily try this on your own using just your PAT (Personal Access Token). Let's unveil the overcharges and save some hard-earned money! :dollar:
+I wrote this tool because I experienced (major) discrepancies in my own shipping weights. > For example, items that according to their own system weigh 9oz were shipped as 3lbs, a 5x > markup! :money_with_wings:
 
-I'm making this tool so you can very easily try this on your own using just your PAT (Personal Access Token).
+You can very easily try this on your own using just your PAT (Personal Access Token).
 
 ## Getting Started :rocket:
 
@@ -65,7 +64,7 @@ Feel the rage? :rage: Now, share this tool with others and let's hold them accou
 
 ### Contributing :handshake:
 
-Feel free to fork this repository, make improvements, and create a pull request. Together, we can make a difference and stop the overcharging madness! :fist:
+Feel free to fork this repository, make improvements, and create a pull request! :fist:
 
 ### License :scroll:
 

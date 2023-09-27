@@ -3,7 +3,7 @@ import { Logger } from "./Logger";
 import { ShipBobAPI } from "./ShipBobApi";
 import { AuditConfig } from "./types";
 
-config();  // Load environment variables from a .env file
+config();
 
 
 
@@ -32,7 +32,7 @@ export class Audit {
 
     private async processOrder(order: any) {
         const orderId = order.id;
-        await this.sleep(this.config.sleepTime);  // Introduce a delay to avoid rate limiting (e.g., 500ms)
+        await this.sleep(this.config.sleepTime);
 
         const discrepancies = await this.compareWeights(orderId);
         let hasChargedWeight = false;
@@ -111,14 +111,14 @@ export class Audit {
                     actualWeight += inventoryItem.dimensions.weight * quantity;
 
                     this.logger.debug(`
-            ------------------------------
-            was negative id: ${isNegativeId}
-            product id: ${product.id}
-            inventory id: ${inventoryItem.id}
-            quantity: ${quantity}
-            individual weight: ${inventoryItem.dimensions.weight}
-            combined weight: ${inventoryItem.dimensions.weight * quantity}
-            ------------------------------
+                    ------------------------------
+                    was negative id: ${isNegativeId}
+                    product id: ${product.id}
+                    inventory id: ${inventoryItem.id}
+                    quantity: ${quantity}
+                    individual weight: ${inventoryItem.dimensions.weight}
+                    combined weight: ${inventoryItem.dimensions.weight * quantity}
+                    ------------------------------
           `);
                 }
             } else {
@@ -128,7 +128,7 @@ export class Audit {
         return actualWeight;
     }
     private async compareShipmentWeight(shipment: any): Promise<{ shipmentId: number, chargedWeight: number, actualWeight: number } | null> {
-        const shipmentWeight = shipment.measurements?.total_weight_oz; // Assuming the weight is available in the measurements object
+        const shipmentWeight = shipment.measurements?.total_weight_oz;
         const actualWeight = await this.calculateActualWeight(shipment.products);
         if (shipmentWeight !== actualWeight && shipmentWeight !== null && actualWeight !== null) {
             return {

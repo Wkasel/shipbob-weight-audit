@@ -85,13 +85,13 @@ export class ShipBobAPI {
         const orders = await this.makeRequest('/order', params);
         if (orders.length > 0) {
           allOrders = allOrders.concat(orders);
-          page++;  // Increment the page number for the next request
+          page++;
         } else {
-          hasMore = false;  // No more orders, exit the loop
+          hasMore = false;
         }
       } catch (error) {
         this.logger.log('Error fetching orders on page ' + page + ': ' + error);
-        throw error;  // Re-throw the error to be handled by the calling code
+        throw error;
       }
     }
 
@@ -99,14 +99,13 @@ export class ShipBobAPI {
   }
 
   public async getShipmentsForOrder(orderId: number): Promise<any> {
-    // console.log('Fetching shipments for order ID:', orderId);  // Log the order ID
+
     try {
       const order = await this.makeRequest(`/order/${orderId}`);
-      // console.log('Fetched order:', order);  // Log the fetched order
       return order.shipments;
     } catch (error) {
       this.logger.log('Error fetching shipments for order ID: ' + orderId + ' ' + error);
-      throw error;  // Re-throw the error to be handled by the calling code
+      throw error;
     }
   }
 
