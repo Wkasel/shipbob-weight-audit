@@ -1,6 +1,8 @@
 # Shipbob Weight Audit :balance_scale:
 
-> A tool to keep them "honest". :face_with_symbols_over_mouth:
+> A tool to keep them "honest".
+
+:face_with_symbols_over_mouth:
 
 I wrote this tool because I experienced (major) discrepancies in my own shipping weights. > For example, items that according to their own system weigh 9oz were shipped as 3lbs, a 5x > markup! :money_with_wings:
 
